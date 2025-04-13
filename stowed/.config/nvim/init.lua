@@ -1,7 +1,72 @@
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+  if vim.v.shell_error ~= 0 then
+    vim.api.nvim_echo({
+      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+      { out, "WarningMsg" },
+      { "\nPress any key to exit..." },
+    }, true, {})
+    vim.fn.getchar()
+    os.exit(1)
+  end
+end
+vim.opt.rtp:prepend(lazypath)
+
 vim.g.mapleader      = " "
 vim.g.maplocalleader = ","
 
-local ok, _ = pcall(require, "impatient")
+require("lazy").setup({
+    spec = {
+        {
+            "folke/lazydev.nvim",
+            ft = "lua", -- only load on lua files
+            opts = {
+                library = {
+                    -- See the configuration section for more details
+                    -- Load luvit types when the `vim.uv` word is found
+                    { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+                },
+            },
+        },
+        { dir = "~/gits/arc.nvim", opts = {}},
+        require("plugins.cmp"),
+        require("plugins.fzf"),
+        require("plugins.lsp"),
+        require("plugins.qf"),
+        require("plugins.hl"),
+        require("plugins.ts"),
+        {"rrethy/base16-nvim", config = function() 
+            vim.cmd[[colorscheme base16-nord]] 
+        end},
+        {"windwp/nvim-autopairs"},
+        {"kylechui/nvim-surround"},
+        {"terrortylor/nvim-comment"},
+        {"ray-x/go.nvim"},
+        {"abecodes/tabout.nvim"},
+        {"j-hui/fidget.nvim", opts = {
+            progress = {
+                display = {
+                    done_icon = ":)",
+                    done_style = "WarningMsg",
+                },
+            },
+            notification = {
+                view = {
+                    group_separator_hl = "DiagnosticWarn"
+                },
+                window = {
+                    normal_hl = "DiagnosticWarn"
+                }
+            },
+        }},
+
+        {"farmergreg/vim-lastplace"},
+        {"ryvnf/readline.vim"},
+        {"nvim-lua/plenary.nvim"},
+    }
+})
 
 vim.o.guifont        = "FantasqueSansM Nerd Font:h20:b"
 vim.o.autochdir      = false
@@ -37,17 +102,17 @@ vim.o.foldnestmax    = 10
 vim.o.foldlevel      = 10000
 vim.o.list           = true
 vim.opt.listchars    = {
-  space = "·",
-  trail = "·",
-  tab   = "  ",
+    space = "·",
+    trail = "·",
+    tab   = "  ",
 }
 
 vim.api.nvim_create_autocmd("TextYankPost", {
-  pattern = "*",
-  group = vim.api.nvim_create_augroup("highlight-on-yank", {clear = true}),
-  callback = function()
-    require'vim.highlight'.on_yank{higroup="Search", timeout=250}
-  end
+    pattern = "*",
+    group = vim.api.nvim_create_augroup("highlight-on-yank", {clear = true}),
+    callback = function()
+        require'vim.highlight'.on_yank{higroup="Search", timeout=250}
+    end
 })
 
 vim.keymap.set("n", "<leader>e",  vim.cmd.Explore)
@@ -72,40 +137,7 @@ vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 vim.keymap.set("v", "K",          ":m '<-2<CR>gv=gv")
 vim.keymap.set("v", "J",          ":m '>+1<CR>gv=gv")
 
-vim.cmd [[color base16-nord]]
-vim.cmd [[highlight @comment guibg=#323844 guifg=#535d72 gui=bold,italic]]
+-- vim.cmd [[highlight @comment guibg=#323844 guifg=#535d72 gui=bold,italic]]
 
-do
-    local function copy_arcadia_link(rev)
-        local _, file_path = vim.fn.expand("%:p"):match("(.+)(arcadia/.+)")
-        if file_path == nil then
-            print("not an arcadia repo")
-            return
-        end
-
-        local cur_begin = vim.fn.getpos("v")[2]
-        local cur_end = vim.fn.line(".")
-
-        local range = string.format("L%d-%d", cur_begin, cur_end)
-
-        if tonumber(cur_begin) > tonumber(cur_end) then
-            range = string.format("L%d-%d", cur_end, cur_begin)
-        end
-
-
-        local link = string.format("https://a.yandex-team.ru/%s?rev=%s#%s", file_path, rev, range)
-        print(link)
-        vim.cmd(string.format([[call setreg("+", "%s")]], link))
-    end
-
-    vim.keymap.set({"n", "x"}, "<leader>at", function()
-        copy_arcadia_link("trunk")
-    end)
-
-    vim.keymap.set({"n", "x"}, "<leader>ab", function()
-        local f = assert(io.popen('arc rev-parse HEAD', 'r'))
-        local rev = f:read('*all'):gsub("%s*", "")
-        f:close()
-        copy_arcadia_link(rev)
-    end)
-end
+require("custom.status")
+require("custom.arc")

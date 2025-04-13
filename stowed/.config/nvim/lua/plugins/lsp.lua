@@ -122,7 +122,7 @@ return {
         })
 
         local gopls_config = {
-            cmd = {"/Users/larynjahor/gits/tools/gopls/gopls", "serve", "--debug=localhost:6060"},
+            -- cmd = {"/Users/larynjahor/gits/tools/gopls/gopls", "serve", "--debug=localhost:6060"},
             handlers = handlers,
             settings = {
                 gopls = {

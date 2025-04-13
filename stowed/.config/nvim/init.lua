@@ -1,72 +1,61 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({
-      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out, "WarningMsg" },
-      { "\nPress any key to exit..." },
-    }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
-  end
+local path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
+if vim.fn.empty(vim.fn.glob(path)) then
+	vim.fn.system { "git", "clone", "--depth=1", "https://github.com/savq/paq-nvim.git", path }
 end
-vim.opt.rtp:prepend(lazypath)
+
+local plug = require("paq")
+
+plug {
+	"savq/paq-nvim",
+	"farmergreg/vim-lastplace",
+    "ryvnf/readline.vim",
+    "nvim-lua/plenary.nvim",
+    "windwp/nvim-autopairs",
+    "kylechui/nvim-surround",
+    "terrortylor/nvim-comment",
+    "ray-x/go.nvim",
+    "abecodes/tabout.nvim",
+    "rrethy/base16-nvim",
+}
+
 
 vim.g.mapleader      = " "
 vim.g.maplocalleader = ","
 
-require("lazy").setup({
-    spec = {
-        {
-            "folke/lazydev.nvim",
-            ft = "lua", -- only load on lua files
-            opts = {
-                library = {
-                    -- See the configuration section for more details
-                    -- Load luvit types when the `vim.uv` word is found
-                    { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-                },
-            },
-        },
-        { dir = "~/gits/arc.nvim", opts = {}},
-        require("plugins.cmp"),
-        require("plugins.fzf"),
-        require("plugins.lsp"),
-        require("plugins.qf"),
-        require("plugins.hl"),
-        require("plugins.ts"),
-        {"rrethy/base16-nvim", config = function() 
-            vim.cmd[[colorscheme base16-nord]] 
-        end},
-        {"windwp/nvim-autopairs"},
-        {"kylechui/nvim-surround"},
-        {"terrortylor/nvim-comment"},
-        {"ray-x/go.nvim"},
-        {"abecodes/tabout.nvim"},
-        {"j-hui/fidget.nvim", opts = {
-            progress = {
-                display = {
-                    done_icon = ":)",
-                    done_style = "WarningMsg",
-                },
-            },
-            notification = {
-                view = {
-                    group_separator_hl = "DiagnosticWarn"
-                },
-                window = {
-                    normal_hl = "DiagnosticWarn"
-                }
-            },
-        }},
-
-        {"farmergreg/vim-lastplace"},
-        {"ryvnf/readline.vim"},
-        {"nvim-lua/plenary.nvim"},
-    }
-})
+-- require("lazy").setup({
+--     spec = {
+--         require("plugins.cmp"),
+--         require("plugins.fzf"),
+--         require("plugins.lsp"),
+--         require("plugins.qf"),
+--         require("plugins.hl"),
+--         require("plugins.ts"),
+--         {, config = function() 
+--             vim.cmd[[colorscheme base16-nord]] 
+--         end},
+--         {},
+--         {},
+--         {},
+--         {},
+--         {},
+--         {"j-hui/fidget.nvim", opts = {
+--             progress = {
+--                 display = {
+--                     done_icon = ":)",
+--                     done_style = "WarningMsg",
+--                 },
+--             },
+--             notification = {
+--                 view = {
+--                     group_separator_hl = "DiagnosticWarn"
+--                 },
+--                 window = {
+--                     normal_hl = "DiagnosticWarn"
+--                 }
+--             },
+--         }},
+--     }
+-- })
 
 vim.o.guifont        = "FantasqueSansM Nerd Font:h20:b"
 vim.o.autochdir      = false
@@ -111,7 +100,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     pattern = "*",
     group = vim.api.nvim_create_augroup("highlight-on-yank", {clear = true}),
     callback = function()
-        require'vim.highlight'.on_yank{higroup="Search", timeout=250}
+        vim.highlight.on_yank{higroup="Search", timeout=250}
     end
 })
 

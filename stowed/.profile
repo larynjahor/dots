@@ -6,7 +6,7 @@ export YELLOW='\033[0;33m'
 export GREEN='\033[0;32m'
 export NC='\033[0m'
 
-export PATH=~/neovim/build/bin:~/bin:~/.local/bin:$PATH
+# export PATH=~/neovim/build/bin:~/bin:~/.local/bin:$PATH
 export NAME=jahor
 export EDITOR=nvim
 
@@ -16,8 +16,8 @@ export NNN_FCOLORS="010104010203030808050505"
 [ $(uname) = Linux ] && alias ls="ls --color=auto" || alias ls="ls -G"
 [ $(uname) = Darwin ] && export LANG=ru_RU.UTF-8
 
+export FZF_OPTS="--color=16"
 
-alias fzf="fzf --color=16"
 alias cdf="cd \$(find * -type d 2>/dev/null | fzf)"
 alias dcd="docker compose down"
 alias dcu="docker compose up -d"

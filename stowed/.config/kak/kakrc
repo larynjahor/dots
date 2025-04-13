@@ -1,0 +1,40 @@
+colorscheme nord
+
+add-highlighter global/ number-lines
+
+define-command -hidden fzf-file %{ nop %sh{
+     tmux popup -d "$PWD" -E -- "fd -t f | fzf $FZF_OPTS | sed -e 's/^/edit /' > $kak_command_fifo"
+}}
+
+define-command -hidden fzf-grep %{ nop %sh{
+     tmux popup -d "$PWD" -E -- "rg --line-number --no-heading --smart-case '.*' | fzf $FZF_OPTS | tr ':' ' ' | cut -d ' ' -f1-2 | sed 's/^/edit /' > $kak_command_fifo" 
+}}
+
+define-command -hidden fzf-buffers %{ nop %sh{
+     tmux popup -d "$PWD" -E -- "echo $kak_quoted_buflist | tr ' ' '\n' | fzf $FZF_OPTS | sed 's/^/b /' > $kak_command_fifo" 
+}}
+  
+map global user p ":fzf-file<ret>" -docstring "Files"
+map global user s ":fzf-grep<ret>" -docstring "Ripgrep"
+map global user b ":fzf-buffers<ret>" -docstring "Buffers"
+
+map global user c ":comment-line<ret>" -docstring "Comment line"
+
+eval %sh{kak-lsp}
+
+set-option global lsp_snippet_support false
+hook global WinSetOption filetype=(go) %{
+    lsp-enable-window
+}
+
+hook -group lsp-filetype-clangd global BufSetOption filetype=(go) %{
+    set-option buffer lsp_servers %{
+        [gopls]
+        root_globs = [ "go.mod"]
+        settings_section = "gopls"
+        [gopls.settings.gopls.env]
+        "CGO_ENABLED" = "0" 
+   }
+}
+
+map global normal <down> ":lsp-find-error --include-warnings<ret>" -docstring "Next lsp error"

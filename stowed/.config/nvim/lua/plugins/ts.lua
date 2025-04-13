@@ -15,8 +15,8 @@ return {
     config = function()
         local configs = require("nvim-treesitter.configs")
         configs.setup({
-            ensure_installed = { "go", "templ", "vimdoc", "bash", "zig" },
-            sync_install = false,
+            ensure_installed = { "go", "lua", "templ", "vimdoc", "bash", "zig" },
+            sync_install = true,
             highlight = {
                 disable = disable_func,
                 enable = true,
